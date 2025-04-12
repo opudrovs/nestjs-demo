@@ -9,7 +9,7 @@ const AppDataSource = new DataSource({
   username: process.env.DB_USER || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'nestjs_demo',
-  synchronize: false, // can override below
+  synchronize: false, // synchronized manually below
   entities: [Property, Order],
 });
 

@@ -10,7 +10,13 @@ import {
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
-import { ApiTags, ApiParam, ApiResponse, ApiOperation } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiTags,
+  ApiParam,
+  ApiResponse,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 @ApiTags('properties')
 @Controller('properties')
@@ -21,6 +27,7 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Create a new property' })
   @ApiResponse({ status: 201, description: 'Property created successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiBody({ type: CreatePropertyDto })
   create(@Body() createPropertyDto: CreatePropertyDto) {
     return this.propertiesService.create(createPropertyDto);
   }
@@ -47,6 +54,7 @@ export class PropertiesController {
   @ApiResponse({ status: 200, description: 'Property updated successfully' })
   @ApiResponse({ status: 404, description: 'Property not found' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiBody({ type: UpdatePropertyDto })
   update(
     @Param('id') id: string,
     @Body() updatePropertyDto: UpdatePropertyDto,
