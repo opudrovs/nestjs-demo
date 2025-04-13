@@ -1,6 +1,7 @@
 import { DataSource } from 'typeorm';
 import { Property } from '../src/properties/entities/property.entity';
 import { Order } from '../src/orders/entities/order.entity';
+import { sampleProperties } from './seed-data';
 
 const AppDataSource = new DataSource({
   type: 'postgres',
@@ -15,8 +16,6 @@ const AppDataSource = new DataSource({
 
 async function seed() {
   await AppDataSource.initialize();
-
-  // 🔥 This will create all tables if they don't exist
   await AppDataSource.synchronize();
 
   console.log('Connected to DB. Seeding data...');
@@ -24,105 +23,38 @@ async function seed() {
   const propertyRepo = AppDataSource.getRepository(Property);
   const orderRepo = AppDataSource.getRepository(Order);
 
-  // Optional: clear data
   await orderRepo.delete({});
   await propertyRepo.delete({});
 
-  // Sample properties
-  const sampleProps = propertyRepo.create([
-    {
-      city: 'Berlin',
-      address: 'Alexanderplatz 1',
-      totalPieces: 100,
-      availablePieces: 100,
-      soldPieces: 0,
-      unitPrice: 5000,
-      status: 'available',
-    },
-    {
-      city: 'Munich',
-      address: 'Marienplatz 8',
-      totalPieces: 50,
-      availablePieces: 50,
-      soldPieces: 0,
-      unitPrice: 8000,
-      status: 'available',
-    },
-    {
-      city: 'Hamburg',
-      address: 'Jungfernstieg 3',
-      totalPieces: 75,
-      availablePieces: 25,
-      soldPieces: 50,
-      unitPrice: 6500,
-      status: 'available',
-    },
-    {
-      city: 'Cologne',
-      address: 'Domstraße 10',
-      totalPieces: 120,
-      availablePieces: 0,
-      soldPieces: 120,
-      unitPrice: 7000,
-      status: 'not_available',
-    },
-    {
-      city: 'Frankfurt',
-      address: 'Main Tower 20',
-      totalPieces: 90,
-      availablePieces: 90,
-      soldPieces: 0,
-      unitPrice: 9500,
-      status: 'available',
-    },
-    {
-      city: 'Stuttgart',
-      address: 'Königstraße 25',
-      totalPieces: 60,
-      availablePieces: 60,
-      soldPieces: 0,
-      unitPrice: 7200,
-      status: 'available',
-    },
-    {
-      city: 'Leipzig',
-      address: 'Augustusplatz 15',
-      totalPieces: 80,
-      availablePieces: 40,
-      soldPieces: 40,
-      unitPrice: 4800,
-      status: 'available',
-    },
-    {
-      city: 'Düsseldorf',
-      address: 'Königsallee 99',
-      totalPieces: 100,
-      availablePieces: 100,
-      soldPieces: 0,
-      unitPrice: 6000,
-      status: 'available',
-    },
-    {
-      city: 'Bremen',
-      address: 'Am Wall 12',
-      totalPieces: 70,
-      availablePieces: 10,
-      soldPieces: 60,
-      unitPrice: 5300,
-      status: 'available',
-    },
-    {
-      city: 'Nuremberg',
-      address: 'Kaiserstraße 7',
-      totalPieces: 40,
-      availablePieces: 0,
-      soldPieces: 40,
-      unitPrice: 4300,
-      status: 'hidden',
-    },
-  ]);
+  // Create properties
+  const propertyEntities = propertyRepo.create(sampleProperties);
+  const savedProperties = await propertyRepo.save(propertyEntities);
 
-  await propertyRepo.save(sampleProps);
+  // Create a few sample orders for existing properties
+  const sampleOrderEntities: Order[] = [];
+
+  if (savedProperties.length >= 2) {
+    sampleOrderEntities.push(
+      orderRepo.create({
+        quantity: 2,
+        property: savedProperties[0],
+      }),
+      orderRepo.create({
+        quantity: 5,
+        property: savedProperties[1],
+      }),
+    );
+
+    // Adjust available/soldPieces manually
+    savedProperties[0].availablePieces -= 2;
+    savedProperties[0].soldPieces += 2;
+
+    savedProperties[1].availablePieces -= 5;
+    savedProperties[1].soldPieces += 5;
+
+    await propertyRepo.save(savedProperties);
+    await orderRepo.save(sampleOrderEntities);
+  }
 
   console.log('Seeding completed!');
   await AppDataSource.destroy();

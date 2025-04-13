@@ -54,7 +54,7 @@ The API will be available at:
 
 http://localhost:3000
 
-Swagger docs:
+Swagger docs (for testing the endpoints) will be available at:
 
 http://localhost:3000/api
 

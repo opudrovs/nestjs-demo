@@ -1,5 +1,6 @@
 import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Order } from '../../orders/entities/order.entity';
+import { PropertyStatus } from '../../common/enums/property-status.enum';
 
 @Entity()
 export class Property {
@@ -24,8 +25,12 @@ export class Property {
   @Column()
   unitPrice: number;
 
-  @Column()
-  status: 'available' | 'not_available' | 'hidden';
+  @Column({
+    type: 'enum',
+    enum: PropertyStatus,
+    default: PropertyStatus.AVAILABLE,
+  })
+  status: PropertyStatus;
 
   @OneToMany(() => Order, (order) => order.property)
   orders: Order[];

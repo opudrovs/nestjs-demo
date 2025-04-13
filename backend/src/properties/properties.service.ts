@@ -4,10 +4,11 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { Property } from './entities/property.entity';
+import { PropertyStatus } from '../common/enums/property-status.enum';
 
 @Injectable()
 export class PropertiesService {
@@ -27,7 +28,10 @@ export class PropertiesService {
   }
 
   async findAll(): Promise<Property[]> {
-    return this.propertyRepository.find();
+    return this.propertyRepository.find({
+      where: { status: Not(PropertyStatus.HIDDEN) },
+      order: { id: 'ASC' },
+    });
   }
 
   async findOne(id: number): Promise<Property> {
