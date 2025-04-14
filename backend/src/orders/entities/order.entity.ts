@@ -15,9 +15,9 @@ export class Order {
   @Column()
   quantity: number;
 
-  @ManyToOne(() => Property)
-  property: Property;
-
   @CreateDateColumn()
   createdAt: Date;
+
+  @ManyToOne(() => Property)
+  property: Property;
 }

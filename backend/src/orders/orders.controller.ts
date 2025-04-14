@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -60,9 +61,10 @@ export class OrdersController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @ApiOperation({ summary: 'Delete an order by ID' })
   @ApiParam({ name: 'id', type: 'number', example: 1 })
-  @ApiResponse({ status: 200, description: 'Order deleted successfully' })
+  @ApiResponse({ status: 204, description: 'Order deleted successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
   remove(@Param('id') id: string) {
     return this.ordersService.remove(+id);

@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  HttpCode,
 } from '@nestjs/common';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
@@ -63,9 +64,10 @@ export class PropertiesController {
   }
 
   @Delete(':id')
+  @HttpCode(204)
   @ApiOperation({ summary: 'Delete a property by ID' })
   @ApiParam({ name: 'id', type: 'number', example: 1 })
-  @ApiResponse({ status: 200, description: 'Property deleted successfully' })
+  @ApiResponse({ status: 204, description: 'Property deleted successfully' })
   @ApiResponse({ status: 404, description: 'Property not found' })
   remove(@Param('id') id: string) {
     return this.propertiesService.remove(+id);

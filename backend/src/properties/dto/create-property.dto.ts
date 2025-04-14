@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsInt, Min, IsString } from 'class-validator';
+import { IsEnum, IsInt, IsNumber, Min, IsString } from 'class-validator';
 import { PropertyStatus } from '../../common/enums/property-status.enum';
 
 export class CreatePropertyDto {
@@ -45,8 +45,11 @@ export class CreatePropertyDto {
     example: 5000,
     description: 'Price per piece (in smallest currency unit, e.g., cents)',
   })
-  @IsInt()
-  @Min(1)
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { message: 'Must be a number' },
+  )
+  @Min(0.01)
   unitPrice: number;
 
   @ApiProperty({
