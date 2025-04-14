@@ -51,7 +51,7 @@ describe('OrdersService', () => {
   });
 
   it('should create an order and update the property', async () => {
-    const createDto: CreateOrderDto = { propertyId: '1', quantity: 2 };
+    const createDto: CreateOrderDto = { propertyId: 1, quantity: 2 };
     const mockProperty: Property = {
       id: 1,
       city: 'Berlin',
@@ -79,7 +79,7 @@ describe('OrdersService', () => {
 
     const findPropArgs = propertyRepo.findOne.mock.calls[0][0];
     expect(findPropArgs).toEqual({
-      where: { id: parseInt(createDto.propertyId) },
+      where: { id: createDto.propertyId },
     });
 
     const createOrderArgs = orderRepo.create.mock.calls[0][0];

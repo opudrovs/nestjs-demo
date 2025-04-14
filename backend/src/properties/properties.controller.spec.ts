@@ -63,7 +63,7 @@ describe('PropertiesController', () => {
     const result = { id: 1 };
     mockPropertiesService.findOne.mockResolvedValue(result);
 
-    expect(await controller.findOne('1')).toEqual(result);
+    expect(await controller.findOne(1)).toEqual(result);
     expect(mockPropertiesService.findOne).toHaveBeenCalledWith(1);
   });
 
@@ -72,14 +72,14 @@ describe('PropertiesController', () => {
     const result = { id: 1, ...dto };
 
     mockPropertiesService.update.mockResolvedValue(result);
-    expect(await controller.update('1', dto)).toEqual(result);
+    expect(await controller.update(1, dto)).toEqual(result);
     expect(mockPropertiesService.update).toHaveBeenCalledWith(1, dto);
   });
 
   it('should call remove on service', async () => {
     mockPropertiesService.remove.mockResolvedValue(undefined);
 
-    await controller.remove('1');
+    await controller.remove(1);
     expect(mockPropertiesService.remove).toHaveBeenCalledWith(1);
   });
 });

@@ -35,7 +35,7 @@ describe('OrdersController', () => {
   });
 
   it('should call create() on service', async () => {
-    const dto: CreateOrderDto = { propertyId: '1', quantity: 3 };
+    const dto: CreateOrderDto = { propertyId: 1, quantity: 3 };
     const mockResult = { id: 1, quantity: 3 } as Order;
     mockOrdersService.create.mockResolvedValue(mockResult);
 
@@ -54,7 +54,7 @@ describe('OrdersController', () => {
     const mockResult = { id: 1 } as Order;
     mockOrdersService.findOne.mockResolvedValue(mockResult);
 
-    expect(await controller.findOne('1')).toEqual(mockResult);
+    expect(await controller.findOne(1)).toEqual(mockResult);
     expect(mockOrdersService.findOne).toHaveBeenCalledWith(1);
   });
 
@@ -64,14 +64,14 @@ describe('OrdersController', () => {
 
     mockOrdersService.update.mockResolvedValue(mockResult);
 
-    expect(await controller.update('1', dto)).toEqual(mockResult);
+    expect(await controller.update(1, dto)).toEqual(mockResult);
     expect(mockOrdersService.update).toHaveBeenCalledWith(1, dto);
   });
 
   it('should call remove on service', async () => {
     mockOrdersService.remove.mockResolvedValue(undefined);
 
-    await controller.remove('1');
+    await controller.remove(1);
     expect(mockOrdersService.remove).toHaveBeenCalledWith(1);
   });
 });
