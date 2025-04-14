@@ -45,8 +45,8 @@ export class OrdersController {
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiResponse({ status: 200, description: 'Order found successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  findOne(@Param('id') id: string) {
-    return this.ordersService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.ordersService.findOne(id);
   }
 
   @Patch(':id')
@@ -56,8 +56,8 @@ export class OrdersController {
   @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiBody({ type: UpdateOrderDto })
-  update(@Param('id') id: string, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.ordersService.update(+id, updateOrderDto);
+  update(@Param('id') id: number, @Body() updateOrderDto: UpdateOrderDto) {
+    return this.ordersService.update(id, updateOrderDto);
   }
 
   @Delete(':id')
@@ -66,7 +66,7 @@ export class OrdersController {
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiResponse({ status: 204, description: 'Order deleted successfully' })
   @ApiResponse({ status: 404, description: 'Order not found' })
-  remove(@Param('id') id: string) {
-    return this.ordersService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.ordersService.remove(id);
   }
 }

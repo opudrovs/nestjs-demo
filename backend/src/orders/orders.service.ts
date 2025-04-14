@@ -23,7 +23,7 @@ export class OrdersService {
     const { propertyId, quantity } = createOrderDto;
 
     const property = await this.propertyRepository.findOne({
-      where: { id: +propertyId },
+      where: { id: propertyId },
     });
 
     if (!property) {
