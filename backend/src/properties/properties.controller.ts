@@ -45,8 +45,8 @@ export class PropertiesController {
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiResponse({ status: 200, description: 'Property found successfully' })
   @ApiResponse({ status: 404, description: 'Property not found' })
-  findOne(@Param('id') id: string) {
-    return this.propertiesService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.propertiesService.findOne(id);
   }
 
   @Patch(':id')
@@ -57,10 +57,10 @@ export class PropertiesController {
   @ApiResponse({ status: 400, description: 'Invalid input' })
   @ApiBody({ type: UpdatePropertyDto })
   update(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() updatePropertyDto: UpdatePropertyDto,
   ) {
-    return this.propertiesService.update(+id, updatePropertyDto);
+    return this.propertiesService.update(id, updatePropertyDto);
   }
 
   @Delete(':id')
@@ -69,7 +69,7 @@ export class PropertiesController {
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiResponse({ status: 204, description: 'Property deleted successfully' })
   @ApiResponse({ status: 404, description: 'Property not found' })
-  remove(@Param('id') id: string) {
-    return this.propertiesService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.propertiesService.remove(id);
   }
 }
