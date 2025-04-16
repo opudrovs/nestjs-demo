@@ -1,6 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, Min } from 'class-validator';
 
+/**
+ * DTO for creating an order.
+ * This class defines the structure of the data required to create a new order.
+ * It includes validation rules to ensure the data is in the correct format.
+ */
 export class CreateOrderDto {
   @ApiProperty({
     example: 1,

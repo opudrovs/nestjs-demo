@@ -3,13 +3,13 @@ import { PropertiesService } from './properties.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Property } from './entities/property.entity';
 import { PropertyStatus } from '../common/enums/property-status.enum';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 
 describe('PropertiesService', () => {
   let service: PropertiesService;
-  let propertyRepo: jest.Mocked<Repository<Property>>;
+  let propertiesRepo: jest.Mocked<Repository<Property>>;
 
   beforeEach(async () => {
     const mockRepo = {
@@ -32,7 +32,7 @@ describe('PropertiesService', () => {
     }).compile();
 
     service = module.get<PropertiesService>(PropertiesService);
-    propertyRepo = module.get(getRepositoryToken(Property));
+    propertiesRepo = module.get(getRepositoryToken(Property));
   });
 
   it('should be defined', () => {
@@ -51,45 +51,60 @@ describe('PropertiesService', () => {
     };
     const created = { id: 1, ...dto };
 
-    propertyRepo.create.mockReturnValue(created as Property);
-    propertyRepo.save.mockResolvedValue(created as Property);
+    propertiesRepo.create.mockReturnValue(created as Property);
+    propertiesRepo.save.mockResolvedValue(created as Property);
 
     const result = await service.create(dto);
 
-    const createArgs = propertyRepo.create.mock.calls[0][0];
+    const createArgs = propertiesRepo.create.mock.calls[0][0];
     expect(createArgs).toEqual(dto);
 
-    const saveArgs = propertyRepo.save.mock.calls[0][0];
+    const saveArgs = propertiesRepo.save.mock.calls[0][0];
     expect(saveArgs).toEqual(created);
 
     expect(result).toEqual(created);
   });
 
   it('should return all non-hidden properties', async () => {
-    const properties = [{ id: 1 }, { id: 2 }] as Property[];
-    propertyRepo.find.mockResolvedValue(properties);
+    const visibleProperty1 = {
+      id: 1,
+      status: PropertyStatus.AVAILABLE,
+    } as Property;
+
+    const visibleProperty2 = {
+      id: 2,
+      status: PropertyStatus.AVAILABLE,
+    } as Property;
+
+    // Mock `find` as if TypeORM has already filtered out the hidden one
+    propertiesRepo.find.mockResolvedValue([visibleProperty1, visibleProperty2]);
 
     const result = await service.findAll();
 
-    expect(propertyRepo.find.mock.calls.length).toBe(1);
+    // Check what the service requested from the repo
+    const findArgs = propertiesRepo.find.mock.calls[0][0];
+    expect(findArgs).toBeDefined();
+    expect(findArgs!.where).toEqual({
+      status: Not(PropertyStatus.HIDDEN),
+    });
 
-    const findArgs =
-      propertyRepo.find.mock.calls.length > 0
-        ? propertyRepo.find.mock.calls[0][0]
-        : undefined;
-
-    expect(findArgs?.order).toEqual({ id: 'ASC' }); // use optional chaining
-    expect(result).toEqual(properties);
+    // Ensure returned result contains only non-hidden
+    expect(result).toEqual([visibleProperty1, visibleProperty2]);
   });
 
   it('should find one property by id', async () => {
     const property = { id: 1 } as Property;
-    propertyRepo.findOne.mockResolvedValue(property);
+    propertiesRepo.findOne.mockResolvedValue(property);
 
     const result = await service.findOne(1);
 
-    const findArgs = propertyRepo.findOne.mock.calls[0][0];
-    expect(findArgs).toEqual({ where: { id: 1 } });
+    const findArgs = propertiesRepo.findOne.mock.calls[0][0];
+    expect(findArgs).toEqual({
+      where: {
+        id: 1,
+        status: Not(PropertyStatus.HIDDEN),
+      },
+    });
 
     expect(result).toEqual(property);
   });
@@ -99,24 +114,24 @@ describe('PropertiesService', () => {
     const dto: UpdatePropertyDto = { city: 'Munich' };
     const updated = { id: 1, city: 'Munich' } as Property;
 
-    propertyRepo.findOne.mockResolvedValue(property);
-    propertyRepo.merge.mockReturnValue(updated);
-    propertyRepo.save.mockResolvedValue(updated);
+    propertiesRepo.findOne.mockResolvedValue(property);
+    propertiesRepo.merge.mockReturnValue(updated);
+    propertiesRepo.save.mockResolvedValue(updated);
 
     const result = await service.update(1, dto);
 
-    const mergeArgs = propertyRepo.merge.mock.calls[0];
+    const mergeArgs = propertiesRepo.merge.mock.calls[0];
     expect(mergeArgs).toEqual([property, dto]);
 
     expect(result).toEqual(updated);
   });
 
   it('should remove a property', async () => {
-    propertyRepo.delete.mockResolvedValue({ affected: 1, raw: {} });
+    propertiesRepo.delete.mockResolvedValue({ affected: 1, raw: {} });
 
     await service.remove(1);
 
-    const deleteArgs = propertyRepo.delete.mock.calls[0][0];
+    const deleteArgs = propertiesRepo.delete.mock.calls[0][0];
     expect(deleteArgs).toBe(1);
   });
 });

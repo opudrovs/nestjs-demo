@@ -19,6 +19,10 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 
+/**
+ * OrdersController handles the HTTP requests related to orders.
+ * It provides endpoints to create, read, update, and delete orders.
+ */
 @ApiTags('orders')
 @Controller('orders')
 export class OrdersController {
@@ -28,6 +32,7 @@ export class OrdersController {
   @ApiOperation({ summary: 'Place a new order' })
   @ApiResponse({ status: 201, description: 'Order placed successfully' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 404, description: 'Property not found' })
   @ApiBody({ type: CreateOrderDto })
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto);
@@ -53,8 +58,8 @@ export class OrdersController {
   @ApiOperation({ summary: 'Update an existing order by ID' })
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiResponse({ status: 200, description: 'Order updated successfully' })
-  @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
   @ApiBody({ type: UpdateOrderDto })
   update(@Param('id') id: number, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(id, updateOrderDto);

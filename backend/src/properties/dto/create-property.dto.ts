@@ -2,6 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsNumber, Min, IsString } from 'class-validator';
 import { PropertyStatus } from '../../common/enums/property-status.enum';
 
+/**
+ * DTO for creating a property.
+ * This class defines the structure of the data required to create a new property.
+ * It includes validation rules to ensure the data is in the correct format.
+ */
 export class CreatePropertyDto {
   @ApiProperty({
     example: 'Berlin',

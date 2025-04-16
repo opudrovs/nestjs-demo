@@ -7,6 +7,10 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 
+/**
+ * Global exception filter that catches all unhandled exceptions and formats the response.
+ * It logs the error details and sends a structured JSON response to the client.
+ */
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
@@ -16,13 +20,23 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
-      exception instanceof HttpException ? exception.getStatus() : 500;
+    let status = 500;
+    let message: string | object = 'Internal server error';
 
-    const message =
-      exception instanceof HttpException
-        ? exception.getResponse()
-        : 'Internal server error';
+    if (exception instanceof HttpException) {
+      status = exception.getStatus();
+      const responseBody = exception.getResponse();
+
+      if (typeof responseBody === 'object' && responseBody !== null) {
+        const responseObj = responseBody as Record<string, unknown>;
+        message =
+          typeof responseObj.message === 'string'
+            ? responseObj.message
+            : JSON.stringify(responseObj);
+      } else {
+        message = responseBody;
+      }
+    }
 
     this.logger.error(
       `[${request.method}] ${request.url} - ${JSON.stringify(message)}`,

@@ -1,4 +1,3 @@
-# .github/workflows/backend_ci.yml
 name: Backend CI Pipeline
 
 on:
