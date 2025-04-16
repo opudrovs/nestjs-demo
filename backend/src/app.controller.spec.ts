@@ -15,7 +15,7 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return running message', () => {
+    it('should return hello world message', () => {
       expect(appController.getHello()).toBe('NestJS API is running!');
     });
   });

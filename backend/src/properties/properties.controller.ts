@@ -19,6 +19,10 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 
+/**
+ * PropertiesController handles the HTTP requests related to properties.
+ * It provides endpoints to create, read, update, and delete properties.
+ */
 @ApiTags('properties')
 @Controller('properties')
 export class PropertiesController {
@@ -53,8 +57,8 @@ export class PropertiesController {
   @ApiOperation({ summary: 'Update an existing property by ID' })
   @ApiParam({ name: 'id', type: 'number', example: 1 })
   @ApiResponse({ status: 200, description: 'Property updated successfully' })
-  @ApiResponse({ status: 404, description: 'Property not found' })
   @ApiResponse({ status: 400, description: 'Invalid input' })
+  @ApiResponse({ status: 404, description: 'Property not found' })
   @ApiBody({ type: UpdatePropertyDto })
   update(
     @Param('id') id: number,

@@ -3,6 +3,10 @@ import { Response } from 'express';
 import { AppService } from './app.service';
 import { ApiExcludeController } from '@nestjs/swagger';
 
+/**
+ * AppController handles the root route and serves a simple hello world message.
+ * It also handles the favicon.ico request by returning a 204 No Content response.
+ */
 @ApiExcludeController()
 @Controller()
 export class AppController {
@@ -15,6 +19,6 @@ export class AppController {
 
   @Get('favicon.ico')
   handleFavicon(@Res() res: Response) {
-    return res.status(204).end(); // 204 No Content
+    return res.status(204).end(); // No content
   }
 }

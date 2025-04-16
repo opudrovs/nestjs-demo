@@ -15,6 +15,12 @@ input {
   font-size: 1rem;
 }
 
+input:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 1px;
+  border-radius: 1px;
+}
+
 button {
   padding: 0.6rem;
   background-color: #007bff;
@@ -30,6 +36,8 @@ button {
   padding: 1rem;
   border-radius: 4px;
   min-height: 100px;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .success {

@@ -1,9 +1,13 @@
-// src/components/OrderForm/OrderForm.tsx
 import { useState } from "react";
 import styles from "./OrderForm.module.css";
 
 const API_URL = "http://localhost:3000/orders";
 
+/**
+ * OrderForm component allows users to place an order for a property.
+ * It includes input fields for property ID and quantity, and handles form submission.
+ * It also displays success or error messages based on the API response.
+ */
 export const OrderForm = () => {
   const [propertyId, setPropertyId] = useState<number>(1);
   const [quantity, setQuantity] = useState<number>(1);
@@ -25,19 +29,16 @@ export const OrderForm = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        console.log(data);
-        const errorMessage = data?.message?.message || "Order failed";
+        console.log("Error:", data);
+        const errorMessage = data?.message || "Order failed";
         throw new Error(errorMessage);
       }
 
       console.log("Order created successfully:", data);
       setMessage(`Order placed! Order ID: ${data.id}`);
-      setPropertyId(1);
-      setQuantity(1);
     } catch (err: unknown) {
       console.error("Error placing order:", err);
       const msg = err instanceof Error ? err.message : "Unexpected error";
-      setError(msg);
       setError(msg);
     }
   };

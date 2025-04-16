@@ -6,14 +6,16 @@ import { Property } from '../properties/entities/property.entity';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { PropertyStatus } from '../common/enums/property-status.enum';
+import { PropertiesService } from '../properties/properties.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let orderRepo: jest.Mocked<Repository<Order>>;
-  let propertyRepo: jest.Mocked<Repository<Property>>;
+  let ordersRepo: jest.Mocked<Repository<Order>>;
+  let propertiesRepo: jest.Mocked<Repository<Property>>;
+  let propertiesService: jest.Mocked<PropertiesService>;
 
   beforeEach(async () => {
-    const mockOrderRepo = {
+    const mockOrdersRepo = {
       create: jest.fn(),
       save: jest.fn(),
       find: jest.fn(),
@@ -22,9 +24,12 @@ describe('OrdersService', () => {
       merge: jest.fn(),
     };
 
-    const mockPropertyRepo = {
-      findOne: jest.fn(),
+    const mockPropertiesRepo = {
       save: jest.fn(),
+    };
+
+    const mockPropertiesService = {
+      findOne: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -32,18 +37,23 @@ describe('OrdersService', () => {
         OrdersService,
         {
           provide: getRepositoryToken(Order),
-          useValue: mockOrderRepo,
+          useValue: mockOrdersRepo,
         },
         {
           provide: getRepositoryToken(Property),
-          useValue: mockPropertyRepo,
+          useValue: mockPropertiesRepo,
+        },
+        {
+          provide: PropertiesService,
+          useValue: mockPropertiesService,
         },
       ],
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    orderRepo = module.get(getRepositoryToken(Order));
-    propertyRepo = module.get(getRepositoryToken(Property));
+    ordersRepo = module.get(getRepositoryToken(Order));
+    propertiesRepo = module.get(getRepositoryToken(Property));
+    propertiesService = module.get(PropertiesService);
   });
 
   it('should be defined', () => {
@@ -66,10 +76,10 @@ describe('OrdersService', () => {
 
     const createdOrder = { id: 1, quantity: 2, property: mockProperty };
 
-    propertyRepo.findOne.mockResolvedValue(mockProperty);
-    orderRepo.create.mockReturnValue(createdOrder as Order);
-    orderRepo.save.mockResolvedValue(createdOrder as Order);
-    propertyRepo.save.mockResolvedValue({
+    propertiesService.findOne.mockResolvedValue(mockProperty);
+    ordersRepo.create.mockReturnValue(createdOrder as Order);
+    ordersRepo.save.mockResolvedValue(createdOrder as Order);
+    propertiesRepo.save.mockResolvedValue({
       ...mockProperty,
       availablePieces: 48,
       soldPieces: 52,
@@ -77,15 +87,23 @@ describe('OrdersService', () => {
 
     const result = await service.create(createDto);
 
-    const findPropArgs = propertyRepo.findOne.mock.calls[0][0];
-    expect(findPropArgs).toEqual({
-      where: { id: createDto.propertyId },
-    });
+    const calledWithPropId = propertiesService.findOne.mock.calls[0][0];
+    expect(calledWithPropId).toBe(createDto.propertyId);
 
-    const createOrderArgs = orderRepo.create.mock.calls[0][0];
-    expect(createOrderArgs).toEqual({
+    const createArgs = ordersRepo.create.mock.calls[0][0];
+    expect(createArgs).toEqual({
       quantity: createDto.quantity,
       property: mockProperty,
+    });
+
+    const saveOrderArgs = ordersRepo.save.mock.calls[0][0];
+    expect(saveOrderArgs).toEqual(createdOrder);
+
+    const savePropertyArgs = propertiesRepo.save.mock.calls[0][0];
+    expect(savePropertyArgs).toEqual({
+      ...mockProperty,
+      availablePieces: 48,
+      soldPieces: 52,
     });
 
     expect(result).toEqual(createdOrder);
@@ -93,53 +111,54 @@ describe('OrdersService', () => {
 
   it('should return all orders', async () => {
     const orders = [{ id: 1 }, { id: 2 }] as Order[];
-    orderRepo.find.mockResolvedValue(orders);
+    ordersRepo.find.mockResolvedValue(orders);
 
     const result = await service.findAll();
 
     expect(result).toEqual(orders);
-    expect(orderRepo.find.mock.calls.length).toBe(1);
+    expect(ordersRepo.find.mock.calls.length).toBe(1);
   });
 
   it('should return one order by id', async () => {
     const order = { id: 1 } as Order;
-    orderRepo.findOne.mockResolvedValue(order);
+    ordersRepo.findOne.mockResolvedValue(order);
 
     const result = await service.findOne(1);
 
-    expect(result).toEqual(order);
-    const findArgs = orderRepo.findOne.mock.calls[0][0];
+    const findArgs = ordersRepo.findOne.mock.calls[0][0];
     expect(findArgs).toEqual({ where: { id: 1 }, relations: ['property'] });
+
+    expect(result).toEqual(order);
   });
 
   it('should update an order', async () => {
     const order = { id: 1, quantity: 2 } as Order;
     const updated = { ...order, quantity: 5 } as Order;
 
-    orderRepo.findOne.mockResolvedValue(order);
-    orderRepo.merge.mockReturnValue(updated);
-    orderRepo.save.mockResolvedValue(updated);
+    ordersRepo.findOne.mockResolvedValue(order);
+    ordersRepo.merge.mockReturnValue(updated);
+    ordersRepo.save.mockResolvedValue(updated);
 
     const result = await service.update(1, { quantity: 5 });
 
-    const findArgs = orderRepo.findOne.mock.calls[0][0];
+    const findArgs = ordersRepo.findOne.mock.calls[0][0];
     expect(findArgs).toEqual({ where: { id: 1 }, relations: ['property'] });
 
-    const mergeArgs = orderRepo.merge.mock.calls[0];
+    const mergeArgs = ordersRepo.merge.mock.calls[0];
     expect(mergeArgs).toEqual([order, { quantity: 5 }]);
 
-    const saveArgs = orderRepo.save.mock.calls[0][0];
+    const saveArgs = ordersRepo.save.mock.calls[0][0];
     expect(saveArgs).toEqual(updated);
 
     expect(result).toEqual(updated);
   });
 
   it('should remove an order', async () => {
-    orderRepo.delete.mockResolvedValue({ affected: 1, raw: {} });
+    ordersRepo.delete.mockResolvedValue({ affected: 1, raw: {} });
 
     await service.remove(1);
 
-    const deleteArgs = orderRepo.delete.mock.calls[0][0];
+    const deleteArgs = ordersRepo.delete.mock.calls[0][0];
     expect(deleteArgs).toBe(1);
   });
 });
